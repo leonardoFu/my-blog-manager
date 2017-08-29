@@ -51,6 +51,8 @@ module.exports = {
   appReducers: resolveApp('src/reducers'),
   appCommonComps: resolveApp('src/components/common'),
   appComps: resolveApp('src/components'),
+  appService: resolveApp('src/service'),
+  appSagas: resolveApp('src/sagas'),
   appConsts: resolveApp('src/constants'),
   yarnLockFile: resolveApp('yarn.lock'),
   testsSetup: resolveApp('src/setupTests.js'),

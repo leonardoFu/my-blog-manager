@@ -30,9 +30,9 @@ const loginFailed = (state, action) => {
     success: false
   }
 }
-const loginReducer = createReducer(initialState, [
-  LOGIN_REQUEST: loginRequest,
-  LOGIN_SUCCESS: loginSuccess,
-  LOGIN_FAILED: loginFailed
-])
+const loginReducer = createReducer(initialState, {
+  [LOGIN_REQUEST]: loginRequest,
+  [LOGIN_SUCCESS]: loginSuccess,
+  [LOGIN_FAILED]: loginFailed
+})
 export default loginReducer;
