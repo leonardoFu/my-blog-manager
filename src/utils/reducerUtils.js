@@ -5,6 +5,12 @@ const createReducer = (initState, handlers) =>
 		}
 		return state;
 	}
+
+const createAction = (type, payload) => ({
+	type,
+	payload
+})
 export {
-  createReducer
+  createReducer,
+	createAction
 }

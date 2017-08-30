@@ -1,22 +1,23 @@
-import { BrowserRouter as Router,Switch , Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router,Switch , Redirect, Route, Link } from 'react-router-dom';
 import React from 'react';
-import logo from '../logo.svg';
-import LoginPage from 'components/Login';
-const IndexPage = () => <div className="App">
-  <div className="App-header">
-    <img src={logo} className="App-logo" alt="logo" />
-    <h2>Welcome to React</h2>
-  </div>
-  <p className="App-intro">
-    To get started, edit <code>src/App.js</code> and save to reload.
-  </p>
-</div>;
+import Home from 'components/Home';
+import Login from 'components/Login';
+import Menu from 'common/Menu';
+
+
 
 const rootRouter = <Router>
   <div>
+    <Menu></Menu>
     <Switch>
-      <Route path = "/login" component = {LoginPage} />
-      <Route path = "/" component = {IndexPage} />
+      <Route path = "/login" component = {Login} />
+      <Route path = "/" render = {() => {
+        let cookie = document.cookie;
+        if(cookie){
+          return <Home></Home>
+        }
+        return  <Redirect to="/login"/>
+      }} />
     </Switch>
   </div>
 </Router>

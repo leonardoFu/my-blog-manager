@@ -15,7 +15,8 @@ export function* watchLogin(){
       };
     } else {
       action = {
-        type: LOGIN_FAILED
+        type: LOGIN_FAILED,
+        payload: loginResult.message
       };
     }
     yield put(action);
