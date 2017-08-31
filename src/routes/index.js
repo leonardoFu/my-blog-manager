@@ -4,20 +4,19 @@ import Home from 'components/Home';
 import Login from 'components/Login';
 import Menu from 'common/Menu';
 
-
+import authUtil from 'utils/authUtil';
 
 const rootRouter = <Router>
   <div>
-    <Menu></Menu>
-    <Switch>
+    <Switch >
       <Route path = "/login" component = {Login} />
       <Route path = "/" render = {() => {
-        let cookie = document.cookie;
-        if(cookie){
-          return <Home></Home>
+        if(authUtil.checkLogin()){
+          return <div><Menu></Menu><Home></Home></div>
         }
         return  <Redirect to="/login"/>
-      }} />
+      }} >
+      </Route>
     </Switch>
   </div>
 </Router>

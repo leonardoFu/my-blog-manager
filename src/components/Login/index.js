@@ -15,13 +15,9 @@ import CloseIcon from 'material-ui-icons/Close';
 import { Redirect } from 'react-router-dom';
 import { LOGIN_REQUEST } from 'constants/action_types';
 import styles from './style';
-
-const errorTexts = {
-  NO_PASS: '请输入密码',
-  NO_NAME: '请输入用户名',
-  FAILED: '用户名/密码不正确',
-  NET_ERROR: '网络连接失败'
-}
+import Cookies from 'js-cookie';
+import { SESSION_KEY } from 'constants/server'
+import * as errorTexts from 'constants/errorText';
 
 class Login extends Component {
   constructor(props) {
@@ -65,6 +61,9 @@ class Login extends Component {
           error
         })
       }
+    } else if(loginState.success){
+      let sid = Cookies.get(SESSION_KEY);
+      if(this.state.rememberMe) Cookies.set(SESSION_KEY, sid, {expires: 7});
     }
 
     this.setState({
@@ -72,7 +71,7 @@ class Login extends Component {
     })
   }
   componentWillUnmount() {
-    clearInterval(this.timer);
+    clearInterval(window.timer);
   }
   fieldChange(fieldName, e){
     this.setState({
@@ -119,7 +118,7 @@ class Login extends Component {
   handleLogin(){
     if(!this.checkBeforeLogin()) return;
     const { props: { dispatch } } = this;
-    this.timer = setInterval(this.progress, 500);
+    window.timer = setInterval(this.progress, 500);
 
     let action = {
       type: LOGIN_REQUEST,
@@ -139,10 +138,10 @@ class Login extends Component {
     if(loginState.success){
       return <Redirect to="/" ></Redirect>
     }
-    return <div>
+    return <div className={classes.fixWrap}>
       <div className={classes['login-wrapper']}>
         <div className={classes.form}>
-          <div>
+          <div >
             <h1>
               <span>Welcome</span>
               <Icon color="primary" className={classes['home-icon']}>home</Icon>

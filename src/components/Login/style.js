@@ -63,6 +63,12 @@ const styles = (theme) => ({
       textAlign: 'center',
       fontWeight: 500
     },
+  },
+  fixWrap: {
+    position:'absolute',
+    height: '100%',
+    width: '100%',
+    overflow: 'hidden'
   }
 })
 

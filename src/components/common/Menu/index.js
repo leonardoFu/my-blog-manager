@@ -67,6 +67,7 @@ class Menu extends Component{
         <List className = {classes.list} >
           {items}
         </List>
+
       </Drawer>)
   }
 }
