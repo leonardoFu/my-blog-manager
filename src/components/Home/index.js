@@ -68,7 +68,6 @@ class IndexPage extends Component{
       dispatch(createAction(menu.open ? CLOSE_MENU : OPEN_MENU));
   }
   render(){
-    console.log(AppRoutes);
 
     const { props: { classes, menu } } = this;
     let headerCls = classNames('App-content'
@@ -88,7 +87,7 @@ class IndexPage extends Component{
             <MenuIcon />
           </IconButton>
           <Typography type="title" color="inherit" className={classes.flex}>
-            Title
+            { menu.appTitle }
           </Typography>
           <Avatar className={classes.userAvatar}>
             <AccountCircle></AccountCircle>

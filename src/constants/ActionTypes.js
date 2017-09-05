@@ -1,4 +1,6 @@
 /*文章*/
+const ARTICLE_LIST_REQUEST = Symbol();
+
 const INIT_ARTICLE_LIST = Symbol();
 
 const CLEAR_ARTICLE_LIST = Symbol();
@@ -19,7 +21,11 @@ const OPEN_MENU = Symbol();
 
 const CLOSE_MENU = Symbol();
 
+/*顶部栏名称*/
+const TOOLBAR_TITLE = Symbol();
+
 export {
+  ARTICLE_LIST_REQUEST,
   INIT_ARTICLE_LIST,
   CLEAR_ARTICLE_LIST,
   INIT_CURRENT_ARTICLE,
@@ -27,5 +33,6 @@ export {
   LOGIN_SUCCESS,
   LOGIN_FAILED,
   OPEN_MENU,
-  CLOSE_MENU
+  CLOSE_MENU,
+  TOOLBAR_TITLE
 }

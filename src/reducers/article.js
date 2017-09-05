@@ -3,12 +3,13 @@ import { INIT_ARTICLE_LIST, CLEAR_ARTICLE_LIST, INIT_CURRENT_ARTICLE } from 'con
 
 const initialState = {
   list: [],
-  current: {}
+  current: {},
+  total: 0
 }
 
 const initArticleList =  (state, action) => {
-  let { payload: list } = action;
-  return Object.assign(state, { list });
+  let { payload: {articles: list, total} } = action;
+  return Object.assign({}, state, { list, total });
 };
 
 const clearArticleList = (state, action) => {

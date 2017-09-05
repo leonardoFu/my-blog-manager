@@ -18,7 +18,7 @@ import styles from './style';
 import Cookies from 'js-cookie';
 import { SESSION_KEY } from 'constants/server'
 import * as errorTexts from 'constants/ErrorText';
-
+import { withRouter } from 'react-router-dom'
 class Login extends Component {
   constructor(props) {
     super(props);
@@ -217,4 +217,4 @@ const mapStateToProps = (state) =>{
     loginState: state.login
   }
 }
-export default connect(mapStateToProps)(withStyles(styles)(Login));
+export default withRouter(connect(mapStateToProps)(withStyles(styles)(Login)));

@@ -3,7 +3,7 @@ import List, { ListItem, ListItemIcon, ListItemText, ListSubheader } from 'mater
 import Divider from 'material-ui/Divider';
 import {MENU_ITEMS as data, ITEM_TYPES as types} from 'constants/MenuItems';
 import { createAction } from 'utils/reducerUtils';
-import { CLOSE_MENU } from 'constants/ActionTypes'
+import { CLOSE_MENU, TOOLBAR_TITLE } from 'constants/ActionTypes'
 import { connect } from 'react-redux'
 import { withStyles } from 'material-ui/styles'
 import classNames from 'classnames';
@@ -66,12 +66,16 @@ class Menu extends Component{
     dispatch(createAction(CLOSE_MENU));
   }
   renderItems(items = []){
+    const { props: { dispatch } } = this;
     return items.map((item, index) => {
       switch(item.type){
         case types.ITEM:
           return <MenuItem key = {index}
             selected={index === this.state.selectedKey}
-            onClick={() => {this.handleSelect.call(null, index)}}
+            onClick={() => {
+              dispatch(createAction(TOOLBAR_TITLE, item.text));
+              this.handleSelect.call(null, index)
+            }}
             {...item} >
           </MenuItem>
         case types.DIVIDER:
@@ -86,7 +90,7 @@ class Menu extends Component{
   }
   render(){
     let items = this.renderItems(data);
-    
+
     let { props: { open, classes } } = this;
     let menuCls = classNames([classes.menu], {[classes.menuClose]: !open});
     return (

@@ -12,7 +12,9 @@
   position: relative;
   top: 64px;
   /*background-color: #222;*/
+  margin: 0 auto;
   height: 100%;
+  width: 70%;
   padding: 20px;
   text-align: left;
 }

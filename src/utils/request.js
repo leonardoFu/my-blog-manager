@@ -18,9 +18,9 @@ let request = {
   },
   get(url, param = {}){
     if(url.includes('?')){
-      url += this.resolveParams(param) ? `&this.resolveParams(param)` : '';
+      url += this.resolveParams(param) ? `&${this.resolveParams(param)}` : '';
     }
-    url += this.resolveParams(param) ?  `?this.resolveParams(param)` : '';
+    url += this.resolveParams(param) ?  `?${this.resolveParams(param)}` : '';
     let option = {
       method: 'GET'
     }
