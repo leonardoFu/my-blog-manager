@@ -13,11 +13,11 @@ import Snackbar from 'material-ui/Snackbar';
 import IconButton from 'material-ui/IconButton';
 import CloseIcon from 'material-ui-icons/Close';
 import { Redirect } from 'react-router-dom';
-import { LOGIN_REQUEST } from 'constants/action_types';
+import { LOGIN_REQUEST } from 'constants/ActionTypes';
 import styles from './style';
 import Cookies from 'js-cookie';
 import { SESSION_KEY } from 'constants/server'
-import * as errorTexts from 'constants/errorText';
+import * as errorTexts from 'constants/ErrorText';
 
 class Login extends Component {
   constructor(props) {

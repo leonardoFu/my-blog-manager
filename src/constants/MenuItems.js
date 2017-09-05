@@ -1,6 +1,8 @@
 import React from 'react';
 import HomeIcon from 'material-ui-icons/Home';
 import BookIcon from 'material-ui-icons/Book';
+import EditIcon from 'material-ui-icons/Edit';
+import CommentIcon from 'material-ui-icons/Comment';
 
 const ITEM_TYPES = {
   ITEM: Symbol(),
@@ -19,10 +21,23 @@ const MENU_ITEMS = [{
   link: '/',
   icon:  <HomeIcon />
 }, {
+  type: ITEM_TYPES.SUB_HEAD,
+  text: '文章管理'
+}, {
   type: ITEM_TYPES.ITEM,
   text: '文章列表',
-  link: '/articles',
-  icon: <BookIcon/>
+  link: '/article/list',
+  icon: <BookIcon />
+}, {
+  type: ITEM_TYPES.ITEM,
+  text: '写文章',
+  link: '/add_article',
+  icon: <EditIcon />
+}, {
+  type: ITEM_TYPES.ITEM,
+  text: '查看评论',
+  link: 'comments',
+  icon: <CommentIcon />
 }];
 
 export {

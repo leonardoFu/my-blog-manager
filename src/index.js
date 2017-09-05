@@ -4,8 +4,7 @@ import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import { Provider } from 'react-redux';
-import configStore from './store/configStore';
-const store = configStore();
+import store from './store/configStore';
 
 const Root = <Provider store = {store}>
   <App />

@@ -94,6 +94,7 @@ module.exports = {
       'constants': paths.appConsts,
       'reducers': paths.appReducers,
       'components': paths.appComps,
+      'routes': paths.appRoutes,
       'common': paths.appCommonComps,
       'service': paths.appService,
       'sagas': paths.appSagas,

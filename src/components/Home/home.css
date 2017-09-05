@@ -1,0 +1,34 @@
+@keyframes appBarIn {
+  from {
+    width: 100%;
+  }
+  to {
+    width: calc(100% - 250px);
+  }
+}
+@keyframes appBarOut {
+  from {
+    width: calc(100% - 250px);
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes contentPadding {
+  from {
+    padding-left: 0;
+  }
+  to {
+    padding-left: 250px;
+  }
+}
+
+@keyframes contentFull {
+  from {
+    padding-left: 250px;
+  }
+  to {
+    padding-left: 0;
+  }
+}

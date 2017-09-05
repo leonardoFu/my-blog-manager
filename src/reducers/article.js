@@ -1,5 +1,5 @@
 import { createReducer } from 'utils/reducerUtils';
-import { INIT_ARTICLE_LIST, CLEAR_ARTICLE_LIST, INIT_CURRENT_ARTICLE } from 'constants/action_types';
+import { INIT_ARTICLE_LIST, CLEAR_ARTICLE_LIST, INIT_CURRENT_ARTICLE } from 'constants/ActionTypes';
 
 const initialState = {
   list: [],

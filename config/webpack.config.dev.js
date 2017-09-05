@@ -95,6 +95,7 @@ module.exports = {
       'common': paths.appCommonComps,
       'service': paths.appService,
       'sagas': paths.appSagas,
+      'routes': paths.appRoutes,
       '@': paths.appSrc,
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/

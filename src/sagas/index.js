@@ -1,5 +1,5 @@
 import { all, take, call, put, fork } from 'redux-saga/effects'
-import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILED } from 'constants/action_types';
+import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILED } from 'constants/ActionTypes';
 import { login } from 'service/user';
 export function* watchLogin(){
   while(true){

@@ -1,5 +1,5 @@
 import { createReducer } from 'utils/reducerUtils';
-import { OPEN_MENU, CLOSE_MENU } from 'constants/action_types';
+import { OPEN_MENU, CLOSE_MENU } from 'constants/ActionTypes';
 const initialState = {
   open: true
 };

@@ -1,5 +1,5 @@
 import { createReducer } from 'utils/reducerUtils';
-import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILED } from 'constants/action_types'
+import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILED } from 'constants/ActionTypes'
 
 const initialState = {
   requestPedding: false,
