@@ -30,4 +30,9 @@ export default [{
   numeric: true,
   disablePadding: false,
   label: '创建时间'
+}, {
+  id: 'operators',
+  numeric: false,
+  disablePadding: false,
+  label: '操作'
 }]

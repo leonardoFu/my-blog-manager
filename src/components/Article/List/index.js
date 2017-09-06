@@ -18,6 +18,7 @@ import Checkbox from 'material-ui/Checkbox';
 import IconButton from 'material-ui/IconButton';
 import columns from 'constants/ArticleCols';
 import DeleteIcon from 'material-ui-icons/Delete';
+import { Link } from 'react-router-dom';
 /**
  * 表头组件，支持访问量的排序
  */
@@ -150,14 +151,22 @@ class ArticleTable extends Component {
 
   handleSort(event , property){
     let newOrder = 'desc';
+    const { props: { dispatch } } = this;
     let { state: { order, orderBy } } = this;
+
     if(property === orderBy && newOrder ===order){
       newOrder = 'asc';
     }
 
+    let queryParam = {
+      pageNum: 1,
+      order: newOrder,
+      orderBy: property,
+    }
+    dispatch(createAction(ARTICLE_LIST_REQUEST, queryParam))
     this.setState({
-      order,
-      orderBy
+      order: newOrder,
+      orderBy: property
     });
   }
 
@@ -184,7 +193,6 @@ class ArticleTable extends Component {
   isSelected = id => this.state.selected.indexOf(id) !== -1;
   render(){
 
-    // const { props: { classes } } = this;
     let { state: { data, order, orderBy, selected } } = this;
 
     return (
@@ -222,11 +230,12 @@ class ArticleTable extends Component {
                     <Checkbox checked={isSelected} />
                   </TableCell>
                   <TableCell disablePadding>{n.title}</TableCell>
-                  <TableCell>{n.articleCls}</TableCell>
+                  <TableCell>{n.class ? n.class.name : ''}</TableCell>
                   <TableCell>{n.keywords}</TableCell>
                   <TableCell>{n.description}</TableCell>
                   <TableCell numeric>{n.pv}</TableCell>
                   <TableCell numeric>{timeStr}</TableCell>
+                  <TableCell><Link to = {`/article/${n.id}`}>编辑</Link></TableCell>
                 </TableRow>
               );
             })}
@@ -245,14 +254,16 @@ class Articles extends Component {
   componentDidMount() {
     const { props: { dispatch } } = this;
     dispatch(createAction(ARTICLE_LIST_REQUEST, {
-      pageNum: 1
+      pageNum: 1,
+      order: 'desc',
+      orderBy: 'created_time'
     }))
   }
   render(){
-    const { props: { list } } = this;
+    const { props: { list, dispatch } } = this;
     return (
       <div>
-        <ArticleTable data={list} ></ArticleTable>
+        <ArticleTable data={list} dispatch={dispatch}></ArticleTable>
       </div>
     )
   }

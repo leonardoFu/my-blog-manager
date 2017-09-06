@@ -9,6 +9,7 @@ import Typography from 'material-ui/Typography';
 import { cyan } from 'material-ui/colors'
 import IconButton from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
+import LeftIcon from 'material-ui-icons/ChevronLeft';
 import Avatar from 'material-ui/Avatar';
 import AccountCircle from 'material-ui-icons/AccountCircle'
 import { CLOSE_MENU, OPEN_MENU } from 'constants/ActionTypes';
@@ -84,7 +85,7 @@ class IndexPage extends Component{
              color="contrast"
              aria-label="Menu"
           >
-            <MenuIcon />
+            {menu.open ? <LeftIcon /> : <MenuIcon />}
           </IconButton>
           <Typography type="title" color="inherit" className={classes.flex}>
             { menu.appTitle }

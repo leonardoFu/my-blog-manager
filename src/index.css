@@ -12,6 +12,7 @@ body {
 a{
   color: -webkit-link;
   cursor: auto;
+  color: #2196f3;
   text-decoration: none;
 }
 /*html{
