@@ -2,7 +2,15 @@ import React, { Component } from 'react';
 import { withStyles } from 'material-ui/styles';
 import { connect } from 'react-redux';
 import { createAction } from 'utils/reducerUtils';
-import { ARTICLE_LIST_REQUEST } from 'constants/ActionTypes';
+import {
+  ARTICLE_LIST_REQUEST,
+  DEL_ARTICLES_REQUEST,
+  CLEAR_ARTICLES_ERROR
+} from 'constants/ActionTypes';
+import Dialog, {
+  DialogActions,
+  DialogTitle
+} from 'material-ui/Dialog';
 import {
   Grid,
   TableView,
@@ -19,12 +27,15 @@ import {
   RowDetailState,
   ColumnOrderState
 } from '@devexpress/dx-react-grid';
+import Button from 'material-ui/Button';
 import { TableCell } from 'material-ui';
+import Snackbar from 'material-ui/Snackbar';
 import classNames from 'classnames';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import Paper from 'material-ui/Paper';
+import CloseIcon from 'material-ui-icons/Close';
 import IconButton from 'material-ui/IconButton';
 import DeleteIcon from 'material-ui-icons/Delete';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
@@ -38,13 +49,13 @@ const toolbarStyles = theme => {
     },
     highlight: {
       color: 'white',
-      backgroundColor: theme.palette.accent[200],
+      backgroundColor: theme.palette.secondary[400],
     },
     spacer: {
       flex: '1 1 100%',
     },
     actions: {
-      color: theme.palette.text.secondary,
+      color: theme.palette.secondary[900],
     },
     title: {
       flex: '0 0 auto',
@@ -57,10 +68,13 @@ class EnhancedTableToolbar extends Component {
   constructor(props) {
     super(props);
     this.showMenu = this.showMenu.bind(this);
+    this.showDelDialog = this.showDelDialog.bind(this);
     this.handleRequestClose = this.handleRequestClose.bind(this);
     this.changeClass = this.changeClass.bind(this);
+    this.handleDelArticles = this.handleDelArticles.bind(this);
     this.state = {
-      open: false,
+      openClsSelection: false,
+      openDelDialog: false,
       anchorEl: null,
       currentCls: 'all',
       title: '全部文章'
@@ -88,26 +102,42 @@ class EnhancedTableToolbar extends Component {
   changeClass(current){
     this.setState({
       currentCls: current,
-      open: false
+      openClsSelection: false
     })
     if(this.props.onClick) {
       this.props.onClick(current === 'all' ? '' : current);
     }
   }
+  handleDelArticles(){
+    const { props: { selectedIds } } = this;
+    let { state: { currentCls } } = this;
+    this.setState({
+      openDelDialog: false
+    }, () => {
+      this.props.onDelArticles(selectedIds, currentCls === 'all' ? '' : currentCls )
+    });
+
+  }
   handleRequestClose(){
     this.setState({
-      open: false
+      openClsSelection: false,
+      openDelDialog: false
+    })
+  }
+  showDelDialog(){
+    this.setState({
+      openDelDialog: true
     })
   }
   showMenu(e){
     this.setState({
-      open: true,
+      openClsSelection: true,
       anchorEl: e.currentTarget
     });
   }
   render(){
     const { numSelected, options = [], classes } = this.props;
-    let { state: { anchorEl, open, title, currentCls } } = this;
+    let { state: { anchorEl, openClsSelection, openDelDialog, title, currentCls } } = this;
     return (
       <Toolbar
         className={classNames(classes.root, {
@@ -124,7 +154,7 @@ class EnhancedTableToolbar extends Component {
         <div className={classes.spacer} />
         <div className={classes.actions}>
           {numSelected > 0 ? (
-            <IconButton aria-label="Delete">
+            <IconButton aria-label="Delete" onClick={this.showDelDialog}>
               <DeleteIcon />
             </IconButton>
           ) : <IconButton aria-label="Menu" onClick={this.showMenu}>
@@ -133,7 +163,7 @@ class EnhancedTableToolbar extends Component {
           <Menu
             id="long-menu"
             anchorEl={anchorEl}
-            open={open}
+            open={openClsSelection}
             onRequestClose={this.handleRequestClose}
             MenuListProps={{
               style: {
@@ -141,7 +171,11 @@ class EnhancedTableToolbar extends Component {
               },
             }}
           >
-          <MenuItem key="all" selected={currentCls === 'all'} onClick={this.changeClass.bind(null, 'all')}>
+          <MenuItem
+            key="all"
+            selected={currentCls === 'all'}
+            onClick={this.changeClass.bind(null, 'all')}
+          >
             全部
           </MenuItem>
           {options.map(option => {
@@ -153,6 +187,17 @@ class EnhancedTableToolbar extends Component {
             </MenuItem>
           })}
         </Menu>
+        <Dialog open={openDelDialog} onRequestClose={this.handleRequestClose}>
+          <DialogTitle>确定删除选中的文章？(删除后不能恢复)</DialogTitle>
+          <DialogActions>
+            <Button onClick={this.handleRequestClose} color="default">
+              怂了
+            </Button>
+            <Button onClick={this.handleDelArticles} color="primary">
+              别拦着我
+            </Button>
+          </DialogActions>
+        </Dialog>
         </div>
 
       </Toolbar>
@@ -167,6 +212,7 @@ class ArticleTable extends Component {
   constructor(props) {
     super(props);
     this.onClassChange = this.onClassChange.bind(this);
+    this.onDelArticles = this.onDelArticles.bind(this);
     this.state = {
       currentPage: 0,
       selected: [],
@@ -184,7 +230,9 @@ class ArticleTable extends Component {
   componentWillReceiveProps(nextProps) {
       this.setState({
         data: nextProps.data,
-        total: nextProps.total
+        total: nextProps.total,
+        selectedIds: nextProps.delSuccess ? [] : this.state.selectedIds,
+        selected: nextProps.delSuccess ? [] : this.state.selected
       })
   }
   onClassChange(classId){
@@ -197,17 +245,35 @@ class ArticleTable extends Component {
       classId
     }))
   }
+  onDelArticles(selectedIds, classId){
+    const { props: { dispatch } } = this;
+    let { state: { order, orderBy, currentPage } } = this;
+    dispatch(createAction(DEL_ARTICLES_REQUEST, {
+      order,
+      orderBy,
+      selectedIds,
+      classId,
+      pageNum: currentPage
+    }));
+  }
   changeSorting = sorting => {
     const { props: { dispatch } } = this;
-    dispatch(createAction(ARTICLE_LIST_REQUEST, {
-      pageNum: 1,
-      order: sorting[0] ? sorting[0].direction : '',
-      orderBy: sorting[0] ? sorting[0].columnName : ''
-    }))
-    this.setState({
-      order: sorting[0] ? sorting[0].direction : '',
-      orderBy: sorting[0] ? sorting[0].columnName : ''
-    });
+    if(sorting[0]) {
+      let { direction, columnName } = sorting[0];
+      if(columnName === 'articleCls') {
+        return;
+      }
+
+      dispatch(createAction(ARTICLE_LIST_REQUEST, {
+        pageNum: 1,
+        order: direction || '',
+        orderBy: columnName || ''
+      }))
+      this.setState({
+        order: direction || '',
+        orderBy: columnName || ''
+      });
+    }
   }
 
   onCurrentPageChange = (currentPage) => {
@@ -232,12 +298,14 @@ class ArticleTable extends Component {
   }
   render(){
     let { state: { selected, data, total, currentPage, selectedIds,  order, orderBy } } = this;
-    const { props: { loading, classes: options } } = this;
+    const { props: { loading, classes: options, dispatch } } = this;
     return (<div >
         <EnhancedTableToolbar
           numSelected={selected.length}
           selectedIds={selectedIds}
           options={options}
+          dispatch={dispatch}
+          onDelArticles={this.onDelArticles}
           onClick={this.onClassChange}
         >
         </EnhancedTableToolbar>
@@ -294,9 +362,18 @@ class ArticleTable extends Component {
   }
 }
 
+const containerStyles = theme => ({
+  close: {
+    width: theme.spacing.unit * 4,
+    height: theme.spacing.unit * 4,
+  },
+});
 class Articles extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      errText: ''
+    }
   }
 
   componentDidMount() {
@@ -307,8 +384,26 @@ class Articles extends Component {
       orderBy: 'created_time'
     }))
   }
+  componentWillReceiveProps(nextProps) {
+    const { props: { dispatch } } = this;
+    this.setState({
+      errText: nextProps.error
+    }, () => {
+      dispatch(createAction(CLEAR_ARTICLES_ERROR))
+    })
+  }
   render(){
-    const { props: { list, total, loading, classes, dispatch } } = this;
+    const { props: {
+       list,
+       total,
+       loading,
+       error,
+       articleClses,
+       classes,
+       dispatch,
+       delSuccess
+    }} = this;
+    let { state: { errText } } = this;
     return (
       <div>
         <ArticleTable
@@ -316,9 +411,34 @@ class Articles extends Component {
           total={total || 0}
           loading= {loading}
           dispatch={dispatch}
-          classes={classes}
+          classes={articleClses}
+          delSuccess={delSuccess}
         >
         </ArticleTable>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={!!error}
+          autoHideDuration={6e3}
+          onRequestClose={this.handleRequestClose}
+          SnackbarContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{errText}</span>}
+          action={[
+            <IconButton
+              key="close"
+              aria-label="Close"
+              color="inherit"
+              className={classes.close}
+              onClick={this.handleRequestClose}
+            >
+              <CloseIcon />
+            </IconButton>
+          ]}
+        />
       </div>
     )
   }
@@ -328,7 +448,9 @@ const mepStateToProps = ({article}) => ({
   list: article.list,
   total: article.total,
   loading: article.loading,
-  classes: article.classes
+  articleClses: article.classes,
+  error: article.error,
+  delSuccess: article.delSuccess
 });
 
-export default connect(mepStateToProps)(Articles);
+export default connect(mepStateToProps)(withStyles(containerStyles)(Articles));

@@ -16,12 +16,21 @@ const queryArticles = (params) => {
   })
 }
 
-const queryClasses = () =>{
+const queryClasses = () => {
   return request.get(`${SERVER}/articles/classes`).then(result => {
     return result.json();
   })
 }
+
+const deleteArticles = (ids) => {
+  if (ids && Array.isArray(ids)){
+    return request.delJSON(`${SERVER}/articles/classes`, ids).then(result => {
+      return result.json();
+    })
+  }
+}
 export {
   queryArticles,
-  queryClasses
+  queryClasses,
+  deleteArticles
 }

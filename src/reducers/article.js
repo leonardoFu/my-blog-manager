@@ -7,7 +7,11 @@ import {
   INIT_ARTICLE_LIST_FAILD,
   ARTICLE_CLASSES_REQUEST,
   ARTICLE_CLASSES_FAILD,
-  INIT_ARTICLE_CLASSES
+  INIT_ARTICLE_CLASSES,
+  DEL_ARTICLES_FAILD,
+  DEL_ARTICLES_REQUEST,
+  DEL_ARTICLES_SUCCESS,
+  CLEAR_ARTICLES_ERROR
 } from 'constants/ActionTypes';
 
 const initialState = {
@@ -15,6 +19,7 @@ const initialState = {
   current: {},
   total: 0,
   error: null,
+  delSuccess: false,
   loading: false,
   classes: []
 }
@@ -57,6 +62,22 @@ const initArticleClasses = (state, action) => {
   return Object.assign({}, state, { loading: false, classes })
 }
 
+const delArticlesRequest = (state, action) => {
+  return Object.assign({}, state, {loading: true});
+}
+
+const delArticlesSuccess = (state, action) => {
+  return Object.assign({}, state, {delSuccess: true, loading: false});
+}
+
+const delArticlesFailed = (state, action) => {
+  let { payload: message } = action;
+  return Object.assign({}, state, {error: message, loading: false});
+}
+
+const clearArticlesErr = (state, action) => {
+  return Object.assign({}, state, {error: initialState.error})
+}
 let articleReducer = createReducer(initialState, {
   [INIT_ARTICLE_LIST]: initArticleList,
   [CLEAR_ARTICLE_LIST]: clearArticleList,
@@ -65,7 +86,11 @@ let articleReducer = createReducer(initialState, {
   [ARTICLE_LIST_REQUEST]: articleListRequest,
   [ARTICLE_CLASSES_REQUEST]: articleClassesRequest,
   [ARTICLE_CLASSES_FAILD]: initAticleClassesFaild,
-  [INIT_ARTICLE_CLASSES]: initArticleClasses
+  [INIT_ARTICLE_CLASSES]: initArticleClasses,
+  [DEL_ARTICLES_FAILD]: delArticlesFailed,
+  [DEL_ARTICLES_REQUEST]: delArticlesRequest,
+  [DEL_ARTICLES_SUCCESS]: delArticlesSuccess,
+  [CLEAR_ARTICLES_ERROR]: clearArticlesErr
 })
 
 export default articleReducer;

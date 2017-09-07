@@ -8,10 +8,13 @@ import {
   INIT_ARTICLE_LIST_FAILD,
   ARTICLE_CLASSES_REQUEST,
   INIT_ARTICLE_CLASSES,
-  ARTICLE_CLASSES_FAILD
+  ARTICLE_CLASSES_FAILD,
+  DEL_ARTICLES_REQUEST,
+  DEL_ARTICLES_FAILD,
+  DEL_ARTICLES_SUCCESS
 } from 'constants/ActionTypes';
 import { login } from 'service/user';
-import { queryArticles, queryClasses } from 'service/article';
+import { queryArticles, queryClasses, deleteArticles } from 'service/article';
 import { createAction } from 'utils/reducerUtils';
 
 export function* watchLogin() {
@@ -36,6 +39,19 @@ export function* watchLogin() {
   }
 }
 
+function* watchDelArticles() {
+  while(true) {
+    const { payload } = yield take(DEL_ARTICLES_REQUEST);
+    let result = yield call(deleteArticles, payload.selectedIds);
+    if(result.error_code === 200) {
+      yield put(createAction(DEL_ARTICLES_SUCCESS))
+      yield put(createAction(ARTICLE_LIST_REQUEST, payload));
+    } else {
+      yield put(createAction(DEL_ARTICLES_FAILD, result.message))
+    }
+  }
+}
+
 function* watchInitArticles() {
   while(true) {
     const { payload } = yield take(ARTICLE_LIST_REQUEST);
@@ -43,7 +59,7 @@ function* watchInitArticles() {
       call(queryArticles, payload),
       call(queryClasses)
     ];
-    
+
     if(articles.error_code === 200) {
       yield put(createAction(INIT_ARTICLE_LIST, articles.data));
     } else {
@@ -73,6 +89,7 @@ export default function* root() {
   yield all([
     fork(watchLogin),
     fork(watchInitArticles),
-    fork(watchInitArticleClasses)
+    fork(watchInitArticleClasses),
+    fork(watchDelArticles)
   ])
 }

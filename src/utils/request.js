@@ -48,6 +48,17 @@ let request = {
       body: JSON.stringify(data)
     }
     return fetch(url, this.crossDomain(option));
+  },
+  delJSON(url, data){
+    let option = {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }
+    return fetch(url, this.crossDomain(option));
   }
 }
 export default request;
