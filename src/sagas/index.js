@@ -5,9 +5,13 @@ import {
   LOGIN_FAILED,
   ARTICLE_LIST_REQUEST,
   INIT_ARTICLE_LIST,
+  INIT_ARTICLE_LIST_FAILD,
+  ARTICLE_CLASSES_REQUEST,
+  INIT_ARTICLE_CLASSES,
+  ARTICLE_CLASSES_FAILD
 } from 'constants/ActionTypes';
 import { login } from 'service/user';
-import { queryArticles } from 'service/article';
+import { queryArticles, queryClasses } from 'service/article';
 import { createAction } from 'utils/reducerUtils';
 
 export function* watchLogin() {
@@ -35,9 +39,33 @@ export function* watchLogin() {
 function* watchInitArticles() {
   while(true) {
     const { payload } = yield take(ARTICLE_LIST_REQUEST);
-    let result = yield call(queryArticles, payload);
-    if(result.error_code === 200){
-      yield put(createAction(INIT_ARTICLE_LIST, result.data));
+    let [articles, classes] = yield [
+      call(queryArticles, payload),
+      call(queryClasses)
+    ];
+    
+    if(articles.error_code === 200) {
+      yield put(createAction(INIT_ARTICLE_LIST, articles.data));
+    } else {
+      yield put(createAction(INIT_ARTICLE_LIST_FAILD, articles.message))
+    }
+
+    if(classes.error_code === 200) {
+      yield put(createAction(INIT_ARTICLE_CLASSES, classes.data));
+    } else {
+      yield put(createAction(ARTICLE_CLASSES_FAILD, classes.message))
+    }
+  }
+}
+
+function* watchInitArticleClasses() {
+  while(true) {
+    yield take(ARTICLE_CLASSES_REQUEST);
+    let result = yield call(queryClasses);
+    if(result.error_code === 200) {
+      yield put(createAction(INIT_ARTICLE_CLASSES, result.data));
+    } else {
+      yield put(createAction(ARTICLE_CLASSES_FAILD, result.message));
     }
   }
 }
@@ -45,5 +73,6 @@ export default function* root() {
   yield all([
     fork(watchLogin),
     fork(watchInitArticles),
+    fork(watchInitArticleClasses)
   ])
 }

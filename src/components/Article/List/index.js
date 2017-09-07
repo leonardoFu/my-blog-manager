@@ -1,74 +1,35 @@
 import React, { Component } from 'react';
 import { withStyles } from 'material-ui/styles';
 import { connect } from 'react-redux';
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableSortLabel,
-} from 'material-ui/Table';
 import { createAction } from 'utils/reducerUtils';
 import { ARTICLE_LIST_REQUEST } from 'constants/ActionTypes';
+import {
+  Grid,
+  TableView,
+  TableHeaderRow,
+  TableSelection,
+  TableRowDetail,
+  PagingPanel,
+} from '@devexpress/dx-react-grid-material-ui';
+import {
+  SelectionState,
+  SortingState,
+  PagingState,
+  DragDropContext,
+  RowDetailState,
+  ColumnOrderState
+} from '@devexpress/dx-react-grid';
+import { TableCell } from 'material-ui';
 import classNames from 'classnames';
+import Menu, { MenuItem } from 'material-ui/Menu';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import Paper from 'material-ui/Paper';
-import Checkbox from 'material-ui/Checkbox';
 import IconButton from 'material-ui/IconButton';
-import columns from 'constants/ArticleCols';
 import DeleteIcon from 'material-ui-icons/Delete';
-import { Link } from 'react-router-dom';
-/**
- * 表头组件，支持访问量的排序
- */
-class TableHeader extends Component {
-  createSortHandler = property => event => {
-    this.props.onRequestSort(event , property);
-  }
-
-  render(){
-    const { props: { onSelectAll, orderBy, order, selectedNum: num} } = this;
-    return (
-      <TableHead>
-        <TableRow>
-          <TableCell checkbox>
-            <Checkbox
-              indeterminate={num > 0 && num < 5}
-              checked={num === 5}
-              onChange={onSelectAll}
-            />
-          </TableCell>
-          {columns.map(column => {
-            let title = '';
-            if(column.numeric){
-              title = <TableSortLabel
-                active={orderBy === column.id}
-                direction={order}
-                onClick={this.createSortHandler(column.id)}
-              >
-                {column.label}
-              </TableSortLabel>
-            } else {
-              title = column.label;
-            }
-
-            return (
-              <TableCell
-                key={column.id}
-                numeric={column.numeric}
-                disablePadding={column.disablePadding}
-              >
-                {title}
-              </TableCell>
-            )
-          })}
-        </TableRow>
-      </TableHead>
-    )
-  }
-}
-
+import MoreVertIcon from 'material-ui-icons/MoreVert';
+import Loading from 'common/Loading'
+import cols from 'constants/ArticleCols';
 const toolbarStyles = theme => {
   console.log(theme.palette);
   return {
@@ -92,156 +53,243 @@ const toolbarStyles = theme => {
 }
 
 
-let EnhancedTableToolbar = props => {
-  const { numSelected, classes } = props;
+class EnhancedTableToolbar extends Component {
+  constructor(props) {
+    super(props);
+    this.showMenu = this.showMenu.bind(this);
+    this.handleRequestClose = this.handleRequestClose.bind(this);
+    this.changeClass = this.changeClass.bind(this);
+    this.state = {
+      open: false,
+      anchorEl: null,
+      currentCls: 'all',
+      title: '全部文章'
+    };
+  }
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.options !== this.props.options){
+      let selected = false;
+      nextProps.options.forEach(v => {
+        if(v.id === this.state.currentCls){
+          this.setState({
+            title: v.name
+          })
+          selected = true;
+        }
+      })
+      if(!selected) {
+        this.setState({
+          title: '全部文章',
+          currentCls: 'all'
+        })
+      }
+    }
+  }
+  changeClass(current){
+    this.setState({
+      currentCls: current,
+      open: false
+    })
+    if(this.props.onClick) {
+      this.props.onClick(current === 'all' ? '' : current);
+    }
+  }
+  handleRequestClose(){
+    this.setState({
+      open: false
+    })
+  }
+  showMenu(e){
+    this.setState({
+      open: true,
+      anchorEl: e.currentTarget
+    });
+  }
+  render(){
+    const { numSelected, options = [], classes } = this.props;
+    let { state: { anchorEl, open, title, currentCls } } = this;
+    return (
+      <Toolbar
+        className={classNames(classes.root, {
+          [classes.highlight]: numSelected > 0,
+        })}
+      >
+        <div className={classes.title}>
+          {numSelected > 0 ? (
+            <Typography type="subheading">{numSelected} 项选中</Typography>
+          ) : (
+            <Typography type="title">{title}</Typography>
+          )}
+        </div>
+        <div className={classes.spacer} />
+        <div className={classes.actions}>
+          {numSelected > 0 ? (
+            <IconButton aria-label="Delete">
+              <DeleteIcon />
+            </IconButton>
+          ) : <IconButton aria-label="Menu" onClick={this.showMenu}>
+            <MoreVertIcon />
+          </IconButton>}
+          <Menu
+            id="long-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onRequestClose={this.handleRequestClose}
+            MenuListProps={{
+              style: {
+                width: 200,
+              },
+            }}
+          >
+          <MenuItem key="all" selected={currentCls === 'all'} onClick={this.changeClass.bind(null, 'all')}>
+            全部
+          </MenuItem>
+          {options.map(option => {
+            return <MenuItem
+              key={option.id}
+              selected={option.id === currentCls}
+              onClick={this.changeClass.bind(null, option.id)}>
+              {`${option.name}(${option.count})`}
+            </MenuItem>
+          })}
+        </Menu>
+        </div>
 
-  return (
-    <Toolbar
-      className={classNames(classes.root, {
-        [classes.highlight]: numSelected > 0,
-      })}
-    >
-      <div className={classes.title}>
-        {numSelected > 0 ? (
-          <Typography type="subheading">{numSelected} 项选中</Typography>
-        ) : (
-          <Typography type="title">文章列表</Typography>
-        )}
-      </div>
-      <div className={classes.spacer} />
-      <div className={classes.actions}>
-        {numSelected > 0 ? (
-          <IconButton aria-label="Delete">
-            <DeleteIcon />
-          </IconButton>
-        ) : null}
-      </div>
-    </Toolbar>
-  );
+      </Toolbar>
+    );
+  }
 };
+
 
 EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
 
 class ArticleTable extends Component {
   constructor(props) {
     super(props);
-    this.handleSort = this.handleSort.bind(this);
+    this.onClassChange = this.onClassChange.bind(this);
     this.state = {
-      orderBy: 'created_time',
-      order: 'desc',
+      currentPage: 0,
       selected: [],
+      selectedIds: [],
+      total: 0,
       data: [],
-      selectedCls: null
+      selectedCls: null,
+      order: 'desc',
+      orderBy: 'created_time'
     };
-  }
-  componentWillReceiveProps(nextProps) {
-    if(nextProps.data !== this.state.data){
-      this.setState({
-        data: nextProps.data
-      })
-    }
-  }
-  handleSelectAllClick = (event, checked) => {
-    if (checked) {
-      this.setState({ selected: this.state.data.map(n => n.id) });
-      return;
-    }
-    this.setState({ selected: [] });
-  };
 
-  handleSort(event , property){
-    let newOrder = 'desc';
+    this.rowTemplate = ({ row }) => <div style = {{ paddingLeft: '48px' }}>{`文章简述：${row.description || ''}`}</div>;
+  }
+
+  componentWillReceiveProps(nextProps) {
+      this.setState({
+        data: nextProps.data,
+        total: nextProps.total
+      })
+  }
+  onClassChange(classId){
     const { props: { dispatch } } = this;
     let { state: { order, orderBy } } = this;
-
-    if(property === orderBy && newOrder ===order){
-      newOrder = 'asc';
-    }
-
-    let queryParam = {
+    dispatch(createAction(ARTICLE_LIST_REQUEST, {
       pageNum: 1,
-      order: newOrder,
-      orderBy: property,
-    }
-    dispatch(createAction(ARTICLE_LIST_REQUEST, queryParam))
+      order,
+      orderBy,
+      classId
+    }))
+  }
+  changeSorting = sorting => {
+    const { props: { dispatch } } = this;
+    dispatch(createAction(ARTICLE_LIST_REQUEST, {
+      pageNum: 1,
+      order: sorting[0] ? sorting[0].direction : '',
+      orderBy: sorting[0] ? sorting[0].columnName : ''
+    }))
     this.setState({
-      order: newOrder,
-      orderBy: property
+      order: sorting[0] ? sorting[0].direction : '',
+      orderBy: sorting[0] ? sorting[0].columnName : ''
     });
   }
 
-  handleClick = (event, id) => {
-    const { selected } = this.state;
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    this.setState({ selected: newSelected });
-  };
-  isSelected = id => this.state.selected.indexOf(id) !== -1;
+  onCurrentPageChange = (currentPage) => {
+    const { props: { dispatch } } = this;
+    let { state: { order, orderBy } } = this;
+    dispatch(createAction(ARTICLE_LIST_REQUEST, {
+      pageNum: currentPage + 1,
+      order: order || '',
+      orderBy: orderBy || '',
+    }));
+    this.setState({
+      currentPage,
+      selected: []
+    })
+  }
+  onSelectionChange = (selection) => {
+    let { state: { data } } = this;
+    this.setState({
+      selected: selection,
+      selectedIds: selection.map(v => data[v].id)
+    });
+  }
   render(){
-
-    let { state: { data, order, orderBy, selected } } = this;
-
-    return (
-      <Paper>
-        <EnhancedTableToolbar numSelected={selected.length}>
+    let { state: { selected, data, total, currentPage, selectedIds,  order, orderBy } } = this;
+    const { props: { loading, classes: options } } = this;
+    return (<div >
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          selectedIds={selectedIds}
+          options={options}
+          onClick={this.onClassChange}
+        >
         </EnhancedTableToolbar>
-        <Table>
-          <TableHeader
-            numSelected={selected.length}
-            order = {order}
-            orderBy = {orderBy}
-            onSelectAllClick={this.handleSelectAllClick}
-            onRequestSort={this.handleSort}
-            >
-            </TableHeader>
-            <TableBody>
-            {data.map(n => {
-              const isSelected = this.isSelected(n.id);
-              let { created_time } = n
-              created_time = new Date(created_time);
-              let timeStr = `${created_time.getFullYear()}
-              -${created_time.getMonth() + 1}
-              -${created_time.getDate()}`
-              return (
-                <TableRow
-                  hover
-                  onClick={event => this.handleClick(event, n.id)}
-                  role="checkbox"
-                  aria-checked={isSelected}
-                  tabIndex="-1"
-                  key={n.id}
-                  selected={isSelected}
-                >
-                  <TableCell checkbox>
-                    <Checkbox checked={isSelected} />
-                  </TableCell>
-                  <TableCell disablePadding>{n.title}</TableCell>
-                  <TableCell>{n.class ? n.class.name : ''}</TableCell>
-                  <TableCell>{n.keywords}</TableCell>
-                  <TableCell>{n.description}</TableCell>
-                  <TableCell numeric>{n.pv}</TableCell>
-                  <TableCell numeric>{timeStr}</TableCell>
-                  <TableCell><Link to = {`/article/${n.id}`}>编辑</Link></TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <Paper style = {{ overflowX: 'auto', position: 'relative' }}>
+        <Grid
+          rows={data}
+          columns={cols}
+        >
+          <ColumnOrderState defaultOrder={['title','articleCls','keywords','pv','created_time','operators']} />
+          <DragDropContext
+            containerTemplate={() => {}}
+            columnTemplate={() => {}}
+          />
+          <TableView tableCellTemplate={({ row, column, style }) => {
+            if (column.name === 'pv') {
+              return <TableCell style={{textAlign: column.align, paddingRight: 8, ...style}}>
+                {row.pv}
+              </TableCell>
+            }
+            else if (column.name === 'created_time') {
+              return <TableCell style={{textAlign: column.align, paddingRight: 8, ...style}}>
+                {column.getCellData(row)}
+              </TableCell>
+            } else if (column.name === 'operators') {
+              return <TableCell style={{textAlign: column.align, paddingRight: 24, ...style}}>
+                {column.getCellData(row)}
+              </TableCell>
+            }
+            }}
+            allowColumnReordering
+          />
+          <SortingState sorting={[{ columnName: orderBy, direction: order }]} onSortingChange={this.changeSorting}/>
+          <PagingState
+            pageSize={10}
+            totalCount={total}
+            onCurrentPageChange={this.onCurrentPageChange}
+            currentPage={currentPage}
+          />
+          <RowDetailState />
+          <SelectionState
+            selection={selected}
+            onSelectionChange={this.onSelectionChange}
+          />
+          <TableHeaderRow allowSorting allowDragging/>
+          <TableRowDetail template={this.rowTemplate}/>
+          <TableSelection />
+          <PagingPanel />
+        </Grid>
+        {loading ? <Loading /> : null}
       </Paper>
+
+      </div>
     )
   }
 }
@@ -260,10 +308,17 @@ class Articles extends Component {
     }))
   }
   render(){
-    const { props: { list, dispatch } } = this;
+    const { props: { list, total, loading, classes, dispatch } } = this;
     return (
       <div>
-        <ArticleTable data={list} dispatch={dispatch}></ArticleTable>
+        <ArticleTable
+          data={list}
+          total={total || 0}
+          loading= {loading}
+          dispatch={dispatch}
+          classes={classes}
+        >
+        </ArticleTable>
       </div>
     )
   }
@@ -271,7 +326,9 @@ class Articles extends Component {
 
 const mepStateToProps = ({article}) => ({
   list: article.list,
-  total: article.total
+  total: article.total,
+  loading: article.loading,
+  classes: article.classes
 });
 
 export default connect(mepStateToProps)(Articles);
