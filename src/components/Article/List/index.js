@@ -41,6 +41,8 @@ import DeleteIcon from 'material-ui-icons/Delete';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
 import Loading from 'common/Loading'
 import cols from 'constants/ArticleCols';
+import * as errorTexts from 'constants/ErrorText';
+
 const toolbarStyles = theme => {
   console.log(theme.palette);
   return {
@@ -225,15 +227,18 @@ class ArticleTable extends Component {
     };
 
     this.rowTemplate = ({ row }) => <div style = {{ paddingLeft: '48px' }}>{`文章简述：${row.description || ''}`}</div>;
+
   }
 
+
   componentWillReceiveProps(nextProps) {
-      this.setState({
-        data: nextProps.data,
-        total: nextProps.total,
-        selectedIds: nextProps.delSuccess ? [] : this.state.selectedIds,
-        selected: nextProps.delSuccess ? [] : this.state.selected
-      })
+    this.setState({
+      data: nextProps.data,
+      total: nextProps.total,
+      selectedIds: nextProps.delSuccess ? [] : this.state.selectedIds,
+      selected: nextProps.delSuccess ? [] : this.state.selected
+    })
+
   }
   onClassChange(classId){
     const { props: { dispatch } } = this;
@@ -372,8 +377,19 @@ class Articles extends Component {
   constructor(props){
     super(props);
     this.state = {
-      errText: ''
+      errText: '',
+      delSuccess: false
+    };
+    this.checkDelSuccess = (successInProp) => {
+      let result = !!(successInProp !== this.delSuccess && successInProp);
+      this.setState({
+        delSuccess: result || !!successInProp,
+        errText: '删除成功！'
+      })
+      return result;
     }
+    this.handleRequestClose = this.handleRequestClose.bind(this);
+    this.delSuccess = 0;
   }
 
   componentDidMount() {
@@ -384,13 +400,34 @@ class Articles extends Component {
       orderBy: 'created_time'
     }))
   }
-  componentWillReceiveProps(nextProps) {
-    const { props: { dispatch } } = this;
+  handleRequestClose(){
     this.setState({
-      errText: nextProps.error
-    }, () => {
-      dispatch(createAction(CLEAR_ARTICLES_ERROR))
+      delSuccess: false,
+      errText: ''
     })
+  }
+  componentWillReceiveProps(nextProps) {
+    let delCheck = this.checkDelSuccess(nextProps.delSuccess);
+    const { props: { dispatch } } = this;
+    if(nextProps.error !== this.props.error && !delCheck){
+      let text ;
+      switch(nextProps.error) {
+        case 'Failed to fetch':
+          text = errorTexts.NET_ERROR;
+          break;
+        default:
+          text = nextProps.error;
+      }
+      this.setState({
+        errText: text
+      }, () => {
+        setTimeout(() => {
+          dispatch(createAction(CLEAR_ARTICLES_ERROR))
+        }, 3000)
+
+      })
+    }
+    this.delSuccess = delCheck ? nextProps.delSuccess : 0;
   }
   render(){
     const { props: {
@@ -400,10 +437,10 @@ class Articles extends Component {
        error,
        articleClses,
        classes,
-       dispatch,
-       delSuccess
+       dispatch
     }} = this;
-    let { state: { errText } } = this;
+
+    let { state: { errText, delSuccess } } = this;
     return (
       <div>
         <ArticleTable
@@ -412,16 +449,16 @@ class Articles extends Component {
           loading= {loading}
           dispatch={dispatch}
           classes={articleClses}
-          delSuccess={delSuccess}
+          delSuccess={this.state.delSuccess}
         >
         </ArticleTable>
         <Snackbar
           anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
+            vertical: 'top',
+            horizontal: 'right',
           }}
-          open={!!error}
-          autoHideDuration={6e3}
+          open={!!error || delSuccess}
+          autoHideDuration={3000}
           onRequestClose={this.handleRequestClose}
           SnackbarContentProps={{
             'aria-describedby': 'message-id',

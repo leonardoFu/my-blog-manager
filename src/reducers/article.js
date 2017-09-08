@@ -19,11 +19,13 @@ const initialState = {
   current: {},
   total: 0,
   error: null,
-  delSuccess: false,
+  delSuccess: 0,
   loading: false,
   classes: []
 }
 
+
+let delSuccess = 0;
 const initArticleList =  (state, action) => {
   let { payload: {articles: list, total} } = action;
   return Object.assign({}, state, { list, total, loading: false });
@@ -67,12 +69,14 @@ const delArticlesRequest = (state, action) => {
 }
 
 const delArticlesSuccess = (state, action) => {
-  return Object.assign({}, state, {delSuccess: true, loading: false});
+  delSuccess++;
+  return Object.assign({}, state, {delSuccess, loading: false});
 }
 
-const delArticlesFailed = (state, action) => {
+const delArticlesFailed = (state, action) => {;
   let { payload: message } = action;
-  return Object.assign({}, state, {error: message, loading: false});
+  delSuccess = 0;
+  return Object.assign({}, state, {delSuccess, error: '删除失败！', loading: false});
 }
 
 const clearArticlesErr = (state, action) => {
