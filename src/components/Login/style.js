@@ -1,5 +1,5 @@
 import background from '../../images/login-background.jpg';
-
+import { indigo } from 'material-ui/colors'
 const styles = (theme) => ({
    primaryColor: {
      backgroundColor: 'rgba(255, 255, 255, 0.02)'
@@ -49,6 +49,7 @@ const styles = (theme) => ({
     position:'relative',
     fontSize: '2.5rem',
     verticalAlign:'sub',
+    color: indigo[500]
   },
   form: {
     display:'flex',
@@ -69,6 +70,9 @@ const styles = (theme) => ({
     height: '100%',
     width: '100%',
     overflow: 'hidden'
+  },
+  checked: {
+    color: indigo[500]
   }
 })
 

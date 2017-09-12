@@ -167,7 +167,7 @@ class Login extends Component {
                 {error.password ? <FormHelperText>{error.password}</FormHelperText> : null}
             </FormControl>
             <FormControlLabel
-              control={<Checkbox checked={ this.state.rememberMe }
+              control={<Checkbox className={classes.checked} checked={ this.state.rememberMe }
                 onChange={this.handleRemember}/>}
               label="记住我">
             </FormControlLabel>

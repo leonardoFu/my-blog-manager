@@ -7,9 +7,11 @@ const FAILED =  '用户名/密码不正确';
 
 const NET_ERROR =  '网络连接失败';
 
+const UNLOGGED = '未登录！';
 export {
   NET_ERROR,
   NO_NAME,
   FAILED,
-  NO_PASS
+  NO_PASS,
+  UNLOGGED
 }
