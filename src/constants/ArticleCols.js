@@ -32,5 +32,5 @@ export default [{
   name: 'operators',
   title: '操作',
   align: 'right',
-  getCellData: row => (<Link to={`/${row.id}`}>编辑</Link>)
+  getCellData: row => (<Link to={`/articles/${row.id}`}>编辑</Link>)
 }]

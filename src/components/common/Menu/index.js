@@ -18,6 +18,9 @@ const style = {
   padding: {
     'margin-top': 10
   },
+  sticky: {
+    position: 'relative'
+  },
   menu: {
     position: 'fixed',
     height: '100%',
@@ -66,7 +69,7 @@ class Menu extends Component{
     dispatch(createAction(CLOSE_MENU));
   }
   renderItems(items = []){
-    const { props: { dispatch } } = this;
+    const { props: { dispatch, classes } } = this;
     return items.map((item, index) => {
       switch(item.type){
         case types.ITEM:
@@ -81,7 +84,9 @@ class Menu extends Component{
         case types.DIVIDER:
           return <Divider key = {index}></Divider>
         case types.SUB_HEAD:
-          return <ListSubheader key = {index}>{item.text}</ListSubheader>
+          return <ListSubheader classes={{
+            sticky: classes.sticky
+          }} key = {index}>{item.text}</ListSubheader>
         default:
           return <MenuItem key = {index} {...item}>
           </MenuItem>

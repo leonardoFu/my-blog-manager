@@ -85,6 +85,7 @@ function* watchInitArticleClasses() {
     }
   }
 }
+
 export default function* root() {
   yield all([
     fork(watchLogin),

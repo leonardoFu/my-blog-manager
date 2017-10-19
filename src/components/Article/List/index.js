@@ -44,7 +44,6 @@ import cols from 'constants/ArticleCols';
 import * as errorTexts from 'constants/ErrorText';
 
 const toolbarStyles = theme => {
-  console.log(theme.palette);
   return {
     root: {
       paddingRight: 2,
